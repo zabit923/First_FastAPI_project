@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import sqlalchemy
 from sqlalchemy import MetaData, Integer, String, TIMESTAMP, ForeignKey, Table, Column, JSON
 
 
@@ -26,3 +27,5 @@ users = Table(
     Column('registered_at', TIMESTAMP, default=datetime.utcnow),
     Column('role_id', Integer, ForeignKey('roles.id')),
 )
+
+
