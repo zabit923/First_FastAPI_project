@@ -1,63 +1,38 @@
-from datetime import datetime
-from enum import Enum
+from fastapi import FastAPI, Depends
+from fastapi_users import fastapi_users, FastAPIUsers
 
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
-from typing_extensions import List, Optional
-
+from auth.auth import auth_backend
+from auth.database import User
+from auth.manager import get_user_manager
+from auth.schemas import UserRead, UserCreate
 
 
 
 app = FastAPI(title='Trading App')
 
 
-users = [
-    {'id': 1, 'role': 'admin', 'name': 'Zabit'},
-    {'id': 2, 'role': 'client', 'name': 'Maga'},
-    {'id': 3, 'role': 'client', 'name': 'Vasya', 'degree': [
-        {'id': 1, 'created_at': '2024-01-01T00:00:00', 'type_degree': 'expert'}
-    ]},
-]
+
+fastapi_users = FastAPIUsers[User, int](
+    get_user_manager,
+    [auth_backend],
+)
+
+app.include_router(
+    fastapi_users.get_auth_router(auth_backend),
+    prefix="/auth/jwt",
+    tags=["auth"],
+)
+
+app.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    prefix="/auth",
+    tags=["auth"],
+)
 
 
-class DegreeType(Enum):
-    newbie: 'newbie'
-    expert: 'expert'
+current_user = fastapi_users.current_user()
 
-class Degree(BaseModel):
-    id: int
-    created_at: datetime
-    type_degree: DegreeType
+@app.get("/protected-route")
+def protected_route(user: User = Depends(current_user)):
+    return f"Hello, {user.username}"
 
-class User(BaseModel):
-    id: int
-    role: str
-    name: str
-    degree: Optional[List[Degree]] = []
-
-
-@app.get('/users/{user_id}', response_model=List[User])
-def get_users(user_id: int):
-    return [user for user in users if user.get('id') == user_id]
-
-
-
-fake_trades = [
-    {'id': 1, 'user_id': 1, 'currency': 'BTC', 'side': 'buy', 'price': 123, 'amount': 2.12},
-    {'id': 2, 'user_id': 2, 'currency': 'RUB', 'side': 'sell', 'price': 1, 'amount': 2.12},
-]
-
-
-class Trade(BaseModel):
-    id: int
-    user_id: int
-    currency: str = Field(max_length=3)
-    side: str
-    price: float = Field(ge=0)
-    amount: float
-
-
-@app.post('/trades')
-def add_trades(trades: List[Trade]):
-    fake_trades.extend(trades)
-    return {'status': 200, 'data': fake_trades}

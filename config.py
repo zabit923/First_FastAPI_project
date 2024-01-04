@@ -11,3 +11,5 @@ DB_NAME = os.environ.get("DB_NAME")
 DB_USER = os.environ.get("DB_USER")
 DB_PASS = os.environ.get("DB_PASS")
 
+SECRET = os.environ.get('SECRET')
+SECRET_FOR_MANAGER = os.environ.get('SECRET_FOR_MANAGER')
