@@ -13,3 +13,6 @@ DB_PASS = os.environ.get("DB_PASS")
 
 SECRET = os.environ.get('SECRET')
 SECRET_FOR_MANAGER = os.environ.get('SECRET_FOR_MANAGER')
+
+SMTP_PASS = os.environ.get('SMTP_PASS')
+SMTP_USER = os.environ.get('SMTP_USER')

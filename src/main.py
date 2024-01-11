@@ -1,3 +1,5 @@
+import time
+
 from fastapi import FastAPI
 from fastapi_users import FastAPIUsers
 
@@ -12,6 +14,7 @@ from auth.models import User
 from auth.manager import get_user_manager
 from auth.schemas import UserRead, UserCreate
 from operations.router import router as router_operation
+from tasks.router import router as router_tasks
 
 
 
@@ -38,6 +41,7 @@ app.include_router(
 )
 
 app.include_router(router_operation)
+app.include_router(router_tasks)
 
 
 @app.on_event("startup")
